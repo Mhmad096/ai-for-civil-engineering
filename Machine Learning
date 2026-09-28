@@ -1,0 +1,49 @@
+#LinearRegression 
+df=pd.read_csv("concrete_data.csv")
+print(df["cement"].max())
+print(df.columns)
+import matplotlib.pyplot as plt
+df["concrete_compressive_strength"].hist(bins=50)
+plt.xlabel("Strength MPa")
+plt.ylabel("# of sample")
+plt.title("Strength Histogram")
+plt.show()
+
+plt.scatter(df["cement"],df["concrete_compressive_strength"])
+plt.xlabel("Cement kg")
+plt.ylabel("Strength MPa")
+plt.title("Cement VS Strength")
+plt.show()
+
+correlation=df["cement"].corr(df["concrete_compressive_strength"])
+print(correlation)
+df1=pd.DataFrame(df.corr())
+df1.to_csv("Correlation.csv")
+
+import sklearn
+print(sklearn.__version__)
+
+x=df[["cement"]]
+y=df["concrete_compressive_strength"]
+
+from sklearn.model_selection import train_test_split
+x_train, x_test, y_train, y_test=train_test_split(x,y,test_size=0.2,random_state=42)
+print(x_train.shape)
+print(x_test.shape)
+print(y_test.shape)
+from sklearn.linear_model import LinearRegression
+model=LinearRegression()
+model.fit(x_train,y_train)
+
+print("Slope a is:",model.coef_)
+print("Inter b is:",model.intercept_)
+
+prediction=model.predict(x_test)
+print(prediction[:8])
+print(y_test[:8].values)
+
+from sklearn.metrics import mean_absolute_error,r2_score
+MAE=mean_absolute_error(y_test,prediction)
+R2=r2_score(y_test,prediction)
+print("MAE is:",MAE)
+print("R2 is:",R2)
