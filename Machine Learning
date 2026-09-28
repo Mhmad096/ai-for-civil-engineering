@@ -18,61 +18,102 @@ plt.show()
 correlation=df["cement"].corr(df["concrete_compressive_strength"])
 print(correlation)
 df1=pd.DataFrame(df.corr())
-df1.to_csv("Correlation.csv")
 
 import sklearn
-print(sklearn.__version__)
-
-x=df[["cement"]]
-y=df["concrete_compressive_strength"]
-
+x=df1[["cement"]]
+y=df1["concrete_compressive_strength"]
 from sklearn.model_selection import train_test_split
 x_train, x_test, y_train, y_test=train_test_split(x,y,test_size=0.2,random_state=42)
 print(x_train.shape)
+print(y_train.shape)
 print(x_test.shape)
 print(y_test.shape)
+
 from sklearn.linear_model import LinearRegression
 model=LinearRegression()
 model.fit(x_train,y_train)
 
-print("Slope a is:",model.coef_)
-print("Inter b is:",model.intercept_)
-
-prediction=model.predict(x_test)
-print(prediction[:8])
-print(y_test[:8].values)
+print("Slope as is: {0}".format(model.coef_))
+print("Interception b is; {0}".format(model.intercept_))
+predict1=model.predict(x_test)
+print(predict1[:10])
+print(y_test[:10].values)
 
 from sklearn.metrics import mean_absolute_error,r2_score
-MAE=mean_absolute_error(y_test,prediction)
-R2=r2_score(y_test,prediction)
-print("MAE is:",MAE)
-print("R2 is:",R2)
+MAE=mean_absolute_error(y_test,predict1)
+R2=r2_score(y_test,predict1)
+print("Mean absolute error: {0}".format(MAE))
+print("R2 score: {0}".format(R2))
+
+x= df1[['cement', 'blast_furnace_slag', 'fly_ash', 'water',
+      'superplasticizer', 'coarse_aggregate', 'fine_aggregate ', 'age']]
+y=df1["concrete_compressive_strength"]
+
+from sklearn.model_selection import train_test_split
+x_train, x_test, y_train, y_test=train_test_split(x,y,test_size=0.2,random_state=42)
+
+from sklearn.linear_model import LinearRegression
+model2=LinearRegression()
+model2.fit(x_train,y_train)
+predict2=model2.predict(x_test)
+print(predict2[:10])
+print(y_test[:10].values)
+
+from sklearn.metrics import mean_absolute_error,r2_score
+MAE2=mean_absolute_error(y_test,predict2)
+R22=r2_score(y_test,predict2)
+print("Mean absolute error2: {0}".format(MAE2))
+print("R² score2: {0}".format(R22))
+
+coefficients=pd.DataFrame({"Features":x.columns,"Coefficients":model2.coef_})
+print(coefficients)
 
 
 
 ## Random Forest
 from sklearn.ensemble import RandomForestRegressor
-Rf_model=RandomForestRegressor()
-Rf_model.fit(x_train,y_train)
-Rf_prediction=Rf_model.predict(x_test)
+model3=RandomForestRegressor()
+model3.fit(x_train,y_train)
 
-from sklearn.metrics import mean_absolute_error,r2_score
-Rf_MAE=mean_absolute_error(y_test,Rf_prediction)
-Rf_R2=r2_score(y_test,Rf_prediction)
+predict3=model3.predict(x_test)
+print(predict3[:10])
+print(y_test[:10].values)
 
-print("RF_MAE is:",Rf_MAE)
-print("RF_R2 is:",Rf_R2)
+MAE3=mean_absolute_error(y_test,predict3)
+R23=r2_score(y_test,predict3)
 
-Importances=({"Features":x.columns,"Importance":Rf_model.feature_importances_})
+print("Mean absolute error3: {0}".format(MAE3))
+print("R² score3: {0}".format(R23))
+
+Importances=pd.DataFrame({"Features":x.columns,"Importances":model3.feature_importances_})
 print(Importances)
 
-train_prediction=Rf_model.predict(x_train)
-train_MAE=mean_absolute_error(y_train,train_prediction)
-train_R2=r2_score(y_train,train_prediction)
+train_predict=model3.predict(x_train)
+train_MAE=mean_absolute_error(y_train,train_predict)
+train_r2 = r2_score(y_train, train_predict)
 
+print(train_predict[:10])
+print(y_train[:10].values)
 print("Training MAE:", train_MAE)
-print("Training R²:", train_R2)
-print("RF_MAE is:",Rf_MAE)
-print("RF_R2 is:",Rf_R2)
+print("Training R²:", train_r2)
+print("Test MAE:", MAE3)
+print("Test R²:", R23)
 
-print("Gap between training and test R²:", train_R2 - Rf_R2)
+print("Gap between training and Test R2:",train_r2-R23)
+
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error,r2_score
+
+model4=RandomForestRegressor(n_estimators=100,max_depth=10,min_samples_leaf=4,random_state=42)
+model4.fit(x_train,y_train)
+
+predict4_test=model4.predict(x_test)
+predict4_train=(model4.predict(x_train))
+
+R4_test=r2_score(y_test,predict4_test)
+R4_train=r2_score(y_train,predict4_train)
+
+print("Test R²: {0}".format(R4_test))
+print("Train R²: {0}".format(R4_train))
+print("Gap between 1st and 2nd: {0}".format(R4_train-R4_test))
+
