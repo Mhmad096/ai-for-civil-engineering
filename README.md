@@ -4,7 +4,7 @@
 Concrete compressive strength is one of the most critical properties in structural design, but determining it traditionally requires waiting weeks for physical curing and lab testing. This project explores whether machine learning can predict compressive strength directly from a mix's ingredients and age — offering engineers a fast, data-driven estimate to support early-stage design and quality control decisions.
 
 ## Data
-- **Source:** Public concrete compressive strength dataset (UCI Machine Learning Repository / Kaggle)
+- **Source:** Public concrete compressive strength dataset (Kaggle)
 - **Size:** 1,030 samples, 9 columns
 - **Features:** cement, blast furnace slag, fly ash, water, superplasticizer, coarse aggregate, fine aggregate, and age (all in kg/m³ except age in days)
 - **Target:** concrete compressive strength (MPa)
