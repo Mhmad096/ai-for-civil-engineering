@@ -117,3 +117,44 @@ print("Test R²: {0}".format(R4_test))
 print("Train R²: {0}".format(R4_train))
 print("Gap between 1st and 2nd: {0}".format(R4_train-R4_test))
 
+
+
+
+## Cross Validation
+import sklearn
+print(sklearn.__version__)
+import pandas as pd
+df=pd.read_csv("concrete_data.csv")
+print(df["cement"].max())
+x=df[['cement', 'blast_furnace_slag', 'fly_ash', 'water', 'superplasticizer',
+       'coarse_aggregate', 'fine_aggregate', 'age']]
+y=df["concrete_compressive_strength"]
+
+from sklearn.model_selection import cross_val_score
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+
+models={"linear Regression":LinearRegression(), "Random Forest (defult)": RandomForestRegressor(random_state=42),
+        "Random Forest (regularized)": RandomForestRegressor(n_estimators=100, max_depth=10, min_samples_leaf=4, random_state=42)}
+for name, m in models.items():
+    scores=cross_val_score(m, x, y, cv=5, scoring="r2")
+    print(name)
+    print("R2 of fold:",scores.round(3))
+    print("Mean of R2:",round(scores.mean(),3), "| STD:",round(scores.std(),3))
+for name, m in models.items():
+    scores=cross_val_score(m, x, y, cv=5, scoring="neg_mean_absolute_error")
+    print(name)
+    print("Neg MAE per fold:",scores.round(3))
+    print("Mean of MAE:",round(scores.mean(),3), "| STD:",round(scores.std(),3))
+
+rf=RandomForestRegressor()
+rf.fit(x_train,y_train)
+pred=rf.predict(x_test)
+
+import matplotlib.pyplot as plt
+plt.scatter(y_test,pred)
+plt.plot([y.min(),y.max()],[y.min(),y.max()], "r--")
+plt.xlabel("Actual Strength")
+plt.ylabel("Predicted Strength")
+plt.title("Predicted VS Actual")
+plt.show()
