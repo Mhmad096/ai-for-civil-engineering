@@ -194,3 +194,50 @@ plt.xlabel("Actual Strength")
 plt.ylabel("Predicted Strength")
 plt.title("Predicted VS Actual")
 plt.show()
+
+
+
+### Classifiers
+import pandas as pd
+Df=pd.read_csv("water_potability.csv")
+print(Df.shape)
+print(DF.columns)
+print(Df.isnull().sum())
+
+x=Df.drop("Potability",axis=1)
+y=Df["Potability"]
+
+print(Df["Potability"].value_counts())
+print(Df["Potability"].value_counts(normalize=True))
+
+from sklearn.model_selection import train_test_split
+from sklearn.dummy import DummyClassifier
+from sklearn.metrics import accuracy_score
+
+dummy=DummyClassifier(strategy="most_frequent")
+dummy.fit(x_train,y_train)
+du_pred=dummy.predict(x_test)
+print("Dummy classifier accuracy:",accuracy_score(y_test,du_pred))
+
+from sklearn.impute import SimpleImputer
+impute=SimpleImputer(strategy="median")
+x_train_imp=impute.fit_transform(x_train)
+x_test_imp=impute.transform(x_test)
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+scale=StandardScaler()
+x_train_s=scale.fit_transform(x_train_imp)
+x_test_s=scale.transform(x_test_imp)
+log_model=LogisticRegression(max_iter=1000)
+log_model.fit(x_train_s,y_train)
+log_pred=log_model.predict(x_test_s)
+print("Logistic regression accuracy:",accuracy_score(y_test,log_pred))
+
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import confusion_matrix,classification_report
+rfc_model=RandomForestClassifier(random_state=42)
+rfc_model.fit(x_train_imp,y_train)
+rfc_pred=rfc_model.predict(x_test_imp)
+print("Random Forest Classifier accuracy:",accuracy_score(y_test,rfc_pred))
+print("Confusion matrex:", confusion_matrix(y_test,rfc_pred))
+print("Classification report:",classification_report(y_test,rfc_pred))
