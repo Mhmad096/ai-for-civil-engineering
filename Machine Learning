@@ -241,3 +241,31 @@ rfc_pred=rfc_model.predict(x_test_imp)
 print("Random Forest Classifier accuracy:",accuracy_score(y_test,rfc_pred))
 print("Confusion matrex:", confusion_matrix(y_test,rfc_pred))
 print("Classification report:",classification_report(y_test,rfc_pred))
+
+
+### Weighted Random Forest Classifier
+rfc_weighted=RandomForestClassifier(random_state=42, class_weight="balanced")
+rfc_weighted.fit(x_train_imp,y_train)
+weight_pred=rfc_weighted.predict(x_test_imp)
+print("Weighted RF accuracy:", accuracy_score(y_test, weight_pred))
+print(confusion_matrix(y_test, weight_pred))
+print(classification_report(y_test, weight_pred))
+
+
+### Udjusting Threshold to improve the classification
+rfc_probs=rfc_model.predict_proba(x_test_imp)[:,1]
+print(rfc_probs[:10])
+
+threshold=0.3
+rfc_probs_cosious=(rfc_probs>threshold).astype(int)
+print(rfc_probs_cosious[:10])
+print(confusion_matrix(y_test, rfc_probs_cosious))
+print(classification_report(y_test, rfc_probs_cosious))
+
+threshold=0.7
+rfc_pred_cosious=(rfc_probs>threshold).astype(int)
+print(rfc_pred_cosious[:10])
+print(confusion_matrix(y_test, rfc_pred_cosious))
+print(classification_report(y_test, rfc_pred_cosious))
+
+
