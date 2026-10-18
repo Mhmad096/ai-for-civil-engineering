@@ -1,0 +1,31 @@
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+
+rf_pipe = Pipeline([
+    ("imputer", SimpleImputer(strategy="median")),
+    ("model", RandomForestClassifier(random_state=42, class_weight="balanced"))
+])
+
+log_pipe = Pipeline([
+    ("imputer", SimpleImputer(strategy="median")),
+    ("scaler", StandardScaler()),
+    ("model", LogisticRegression(max_iter=1000, class_weight="balanced"))
+])
+
+from sklearn.model_selection import StratifiedKFold, cross_validate
+
+X = df.drop("Potability", axis=1)
+y = df["Potability"]
+
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+scoring = ["accuracy", "recall", "precision", "roc_auc"]
+
+for name, pipe in [("Random Forest", rf_pipe), ("Logistic Regression", log_pipe)]:
+    results = cross_validate(pipe, X, y, cv=cv, scoring=scoring)
+    print(name)
+    for metric in scoring:
+        s = results[f"test_{metric}"]
+        print(f"  {metric:10s} per fold: {s.round(3)}  mean: {s.mean():.3f}  std: {s.std():.3f}")
