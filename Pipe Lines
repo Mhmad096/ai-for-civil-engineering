@@ -29,3 +29,33 @@ for name, pipe in [("Random Forest", rf_pipe), ("Logistic Regression", log_pipe)
     for metric in scoring:
         s = results[f"test_{metric}"]
         print(f"  {metric:10s} per fold: {s.round(3)}  mean: {s.mean():.3f}  std: {s.std():.3f}")
+
+
+
+from sklearn.model_selection import cross_val_predict
+from sklearn.metrics import precision_recall_curve
+import matplotlib.pyplot as plt
+
+probs=cross_val_predict(rfc_pipe, x, y, cv=cv, method="predict_proba")[:,1]
+percision, recall, thresholds= precision_recall_curve(y,probs)
+
+plt.plot(thresholds, precision[:-1], label="Precsion (Class 1)")
+plt.plot(thresholds, recall[:-1], label="Recall (Class 1)")
+plt.xlabel("Threshold")
+plt.ylabel("Score")
+plt.title("Precision and Recall vs Threshold")
+plt.legend()
+plt.show()
+
+
+target_precision=0.8
+ok=precision[:-1]>=target_precision
+
+if ok.any():
+    idx=ok.argmax()
+    print("index", idx)
+    print("threshold at that index: ", round(thresholds[idx],3))
+    print("precision at that index: ", round(precision[idx],3))
+    print("recall at that index: ", round(recall[idx],3))
+else:
+    print("No threshold reaches ", target_precision, "precision in this data")
