@@ -59,3 +59,49 @@ if ok.any():
     print("recall at that index: ", round(recall[idx],3))
 else:
     print("No threshold reaches ", target_precision, "precision in this data")
+
+
+### Can better tools or better features raise the signal?
+
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import StratifiedKFold, cross_validate
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import HistGradientBoostingClassifier
+from sklearn.impute import SimpleImputer
+import pandas as pd
+x=df1.drop("Potability", axis=1)
+y=df1["Potability"]
+
+print(df1.corr()["Potability"].sort_values())
+
+cv=StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+metrics = ["accuracy", "recall", "precision", "roc_auc"]
+summary={}
+def evaluate (name, model, x, y):
+    res=cross_validate(model, x, y, cv=cv, scoring=metrics)
+    row={}
+    for m in metrics:
+        row[m]=res[f"test_{m}"].mean()
+        row["auc_std"]=res["test_roc_auc"].std()
+    summary[name]=row
+
+rfc_pipe=Pipeline([
+    ("imputer", SimpleImputer(strategy="median")),
+    ("model", RandomForestClassifier(random_state=42, class_weight="balanced"))
+])
+
+hgb=HistGradientBoostingClassifier(learning_rate=0.5, max_depth=10, max_iter=200, random_state=42, class_weight="balanced")
+
+evaluate("Random Forest", rfc_pipe, x, y)
+evaluate("Hist Gradient Boosting", hgb, x, y)
+
+x2=x.copy()
+x2["ph_in_range"] = (x["ph"].between(6.5,8.5)).astype(float).where(x["ph"].notna())
+x2["thm_ok"] = (x["Trihalomethanes"] <= 80).astype(float).where(x["Trihalomethanes"].notna())
+x2["chloramines_ok"] = (x["Chloramines"] <= 4).astype(float)
+x2["turbidity_ok"] = (x["Turbidity"] < 5).astype(float)
+
+evaluate("Random Forest + guideline features", rfc_pipe, x2, y)
+evaluate("Hist Gradient Boosting + guideline features", hgb, x2, y)
+
+print(pd.DataFrame(summary).T.round(3))
